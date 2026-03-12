@@ -6,20 +6,20 @@
 
 #define BUF_SIZE 1024
 #define RANDOMFILE "/dev/random"
-#define RANDOM_MODULE
+#define RANDOM_MODULE 100000
 
 // Keeping the random file open in global scope
 FILE * Rand;
 
 int print_label(const char *name, const struct stat *file_stats, int file_type, struct FTW * info){
 	//randomly decide whether to carry out with the rest of the function
-        unsigned int randval;
+    unsigned int randval;
 	fread( &randval, sizeof(randval), 1, Rand);
 	if (randval % RANDOM_MODULO != 0){
 		return 0;
 	}
 
-        // Print the file and its security label
+	// Print the file and its security label
 	size_t ret_size;
 	char buf[BUF_SIZE] = {0};
 	if (file_type == FTW_F) { // if the result is a file
@@ -36,7 +36,7 @@ int print_label(const char *name, const struct stat *file_stats, int file_type, 
 }
 
 void scan( const char *root){
-        //recursively iterate through each directory
+    //recursively iterate through each directory
 	if( nftw(root, print_label, 32, 0) ){
 		perror("ntfw");
 	}
@@ -54,5 +54,5 @@ int main(){
 	scan("/dev");
 	scan("/etc");
 
-        fclose(Rand);
+    fclose(Rand);
 }
