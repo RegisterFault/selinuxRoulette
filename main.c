@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <ftw.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +7,7 @@
 
 #define BUF_SIZE 1024
 #define RANDOMFILE "/dev/random"
-#define RANDOM_MODULE 100000
+#define RANDOM_MODULO 100000
 
 // Keeping the random file open in global scope
 FILE * Rand;
