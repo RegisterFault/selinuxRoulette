@@ -58,7 +58,6 @@ int pull_trigger(const char *name, const struct stat *file_stats, int file_type,
 	return 0;
 }
 
-
 void scan( const char *root)
 {
 	//recursively iterate through each directory
