@@ -30,7 +30,7 @@ or
 fixfiles relabel
 ```
 
-This is only going to do anything on distros that use SELinux, which is
+SelinuxRoulette is only going to affect anything on distros that use SELinux, which is
 going to be stuff thats Red Hat/Fedora and SUSE based (except for Nobara, those guys
 seemed to have looked at the lovecraftian horrors of SELinux policy and decided that
 maybe they won't have any fun maintaining that). 
