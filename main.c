@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <sys/xattr.h>
 #include <selinux/selinux.h>
 
@@ -12,9 +13,10 @@
 
 // Keeping the random file open in global scope
 FILE * Rand;
+bool DryRun = false;
 
 int bang(const char *name){
-	//fully unconfined selinux label, guaranteed to make selinux wag its finger
+	//fully unconfined selinux label, might make selinux wag its finger
 	const char *unconfined = "unconfined_u:object_r:default_t:s0";
 
 	if (setfilecon(name, unconfined) < 0){
@@ -47,7 +49,8 @@ int pull_trigger(const char *name, const struct stat *file_stats, int file_type,
 	// Print the file and its security label
 	if (file_type == FTW_F) { // if the result is a file
 		print_label(name);
-		//bang(name);
+		if (!DryRun)
+			bang(name);
 	}
 	return 0;
 }
@@ -60,7 +63,25 @@ void scan( const char *root){
 	}
 }
 
-int main(){
+int main(int argc, char *argv[]){
+
+	//Too lazy to remember how to do proper argparse
+	if (argc>2){
+		fprintf(stderr, "Usage: -d:  dry run\n");
+		exit(1);
+	}
+
+	if (argc == 2){
+		if (strcmp(argv[1], "-d") == 0){
+			DryRun = true;
+		} else {
+			fprintf(stderr, "Usage: -d:  dry run\n");
+			exit(1);
+		}
+	}
+	if (DryRun)
+		printf("Running in Dry Run Mode, not making any changes\n");
+	 
 	Rand = fopen(RANDOMFILE, "r");
 	scan("/usr/share");
 	scan("/usr/libexec");
@@ -73,3 +94,4 @@ int main(){
 	scan("/etc");
 	fclose(Rand);
 }
+
