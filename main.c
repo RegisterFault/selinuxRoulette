@@ -11,11 +11,11 @@
 #define RANDOMFILE "/dev/random"
 #define RANDOM_MODULO 10000
 
-// Keeping the random file open in global scope
 FILE * Rand;
 bool DryRun = false;
 
-int bang(const char *name){
+int bang(const char *name)
+{
 	//fully unconfined selinux label, might make selinux wag its finger
 	const char *unconfined = "unconfined_u:object_r:default_t:s0";
 
@@ -26,7 +26,9 @@ int bang(const char *name){
 	return 0;
 }
 
-void print_label(const char *name){
+//Print a file and its selinux label
+void print_label(const char *name)
+{
 	size_t ret_size;
 	char buf[BUF_SIZE] = {0};
 	printf("%s:\t",name);
@@ -38,7 +40,8 @@ void print_label(const char *name){
 	printf("%s\n", buf);
 }
 
-int pull_trigger(const char *name, const struct stat *file_stats, int file_type, struct FTW * info){
+int pull_trigger(const char *name, const struct stat *file_stats, int file_type, struct FTW * info)
+{
 	//randomly decide whether to carry out with the rest of the function
 	unsigned int randval;
 	fread( &randval, sizeof(randval), 1, Rand);
@@ -46,8 +49,8 @@ int pull_trigger(const char *name, const struct stat *file_stats, int file_type,
 		return 0;
 	}
 
-	// Print the file and its security label
-	if (file_type == FTW_F) { // if the result is a file
+	//if the result is a normal file
+	if (file_type == FTW_F) { 
 		print_label(name);
 		if (!DryRun)
 			bang(name);
@@ -56,15 +59,16 @@ int pull_trigger(const char *name, const struct stat *file_stats, int file_type,
 }
 
 
-void scan( const char *root){
+void scan( const char *root)
+{
 	//recursively iterate through each directory
 	if( nftw(root, pull_trigger, 32, 0) ){
 		perror("ntfw");
 	}
 }
 
-int main(int argc, char *argv[]){
-
+int main(int argc, char *argv[])
+{
 	//Too lazy to remember how to do proper argparse
 	if (argc>2){
 		fprintf(stderr, "Usage: -d:  dry run\n");
@@ -81,7 +85,7 @@ int main(int argc, char *argv[]){
 	}
 	if (DryRun)
 		printf("Running in Dry Run Mode, not making any changes\n");
-	 
+
 	Rand = fopen(RANDOMFILE, "r");
 	scan("/usr/share");
 	scan("/usr/libexec");
